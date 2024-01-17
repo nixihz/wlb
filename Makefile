@@ -44,6 +44,10 @@ api:
 	       --openapi_out=fq_schema_naming=true,default_response=false:. \
 	       $(API_PROTO_FILES)
 
+http:
+	go run main.go http
+
+
 .PHONY: build
 # build
 build:
@@ -53,8 +57,7 @@ build:
 # generate
 generate:
 	go mod tidy
-	go get github.com/google/wire/cmd/wire@latest
-	go generate ./...
+	GOFLAGS=-mod=mod go generate ./...
 
 .PHONY: all
 # generate all

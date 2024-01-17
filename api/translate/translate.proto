@@ -1,0 +1,25 @@
+syntax = "proto3";
+
+package translate;
+
+import "google/api/annotations.proto";
+
+option go_package = "wlb/api/translate/;translate";
+
+service Translate{
+
+  rpc Text(TranslateTextRequest)returns(TranslateTextReply) {
+    option (google.api.http) = {
+      post: "/v1/text"
+      body:"*"
+    };
+  }
+}
+
+message TranslateTextRequest {
+  string input = 1;
+}
+
+message TranslateTextReply {
+  string output = 1;
+}

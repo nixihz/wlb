@@ -3,6 +3,7 @@ package server
 import (
 	v1 "wlb/api/helloworld/v1"
 	common "wlb/api/network"
+	translate2 "wlb/api/translate"
 	"wlb/internal/conf"
 	"wlb/internal/service"
 
@@ -12,7 +13,10 @@ import (
 )
 
 // NewHTTPServer new an HTTP server.
-func NewHTTPServer(c *conf.Server, greeter *service.GreeterService, logger log.Logger) *http.Server {
+func NewHTTPServer(c *conf.Server,
+	greeter *service.GreeterService,
+	translate *service.TranslateService,
+	logger log.Logger) *http.Server {
 	var opts = []http.ServerOption{
 		http.Middleware(
 			recovery.Recovery(),
@@ -29,6 +33,7 @@ func NewHTTPServer(c *conf.Server, greeter *service.GreeterService, logger log.L
 	}
 	srv := http.NewServer(opts...)
 	v1.RegisterGreeterHTTPServer(srv, greeter)
-	common.RegisterUploadHTTPServer(srv, greeter)
+	translate2.RegisterTranslateHTTPServer(srv, translate)
+	common.RegisterUploadHTTPServer(srv)
 	return srv
 }

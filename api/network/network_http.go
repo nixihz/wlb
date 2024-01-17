@@ -9,6 +9,6 @@ func RegisterUploadHTTPServer(s *http.Server) {
 	router := s.Route("/")
 
 	router.POST("/common/file/upload", func(ctx http.Context) error {
-		return ctx.Result(200, out)
+		return ctx.Result(200, nil)
 	})
 }

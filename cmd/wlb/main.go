@@ -1,9 +1,10 @@
-package main
+package wlb
 
 import (
 	"flag"
 	"os"
 
+	"github.com/spf13/cobra"
 	"wlb/internal/conf"
 
 	"github.com/go-kratos/kratos/v2"
@@ -30,7 +31,7 @@ var (
 )
 
 func init() {
-	flag.StringVar(&flagconf, "conf", "../../configs", "config path, eg: -conf config.yaml")
+	flag.StringVar(&flagconf, "conf", "./configs/config.yaml", "config path, eg: -conf config.yaml")
 }
 
 func newApp(logger log.Logger, gs *grpc.Server, hs *http.Server) *kratos.App {
@@ -47,41 +48,47 @@ func newApp(logger log.Logger, gs *grpc.Server, hs *http.Server) *kratos.App {
 	)
 }
 
-func main() {
-	flag.Parse()
-	logger := log.With(log.NewStdLogger(os.Stdout),
-		"ts", log.DefaultTimestamp,
-		"caller", log.DefaultCaller,
-		"service.id", id,
-		"service.name", Name,
-		"service.version", Version,
-		"trace.id", tracing.TraceID(),
-		"span.id", tracing.SpanID(),
-	)
-	c := config.New(
-		config.WithSource(
-			file.NewSource(flagconf),
-		),
-	)
-	defer c.Close()
+// HttpCmd represents the http command
+var HttpCmd = &cobra.Command{
+	Use:   "http",
+	Short: "http",
+	Long:  `http接口`,
+	Run: func(cmd *cobra.Command, args []string) {
+		flag.Parse()
+		logger := log.With(log.NewStdLogger(os.Stdout),
+			"ts", log.DefaultTimestamp,
+			"caller", log.DefaultCaller,
+			"service.id", id,
+			"service.name", Name,
+			"service.version", Version,
+			"trace.id", tracing.TraceID(),
+			"span.id", tracing.SpanID(),
+		)
+		c := config.New(
+			config.WithSource(
+				file.NewSource(flagconf),
+			),
+		)
+		defer c.Close()
 
-	if err := c.Load(); err != nil {
-		panic(err)
-	}
+		if err := c.Load(); err != nil {
+			panic(err)
+		}
 
-	var bc conf.Bootstrap
-	if err := c.Scan(&bc); err != nil {
-		panic(err)
-	}
+		var bc conf.Bootstrap
+		if err := c.Scan(&bc); err != nil {
+			panic(err)
+		}
 
-	app, cleanup, err := wireApp(bc.Server, bc.Data, logger)
-	if err != nil {
-		panic(err)
-	}
-	defer cleanup()
+		app, cleanup, err := wireApp(bc.Server, bc.Data, logger)
+		if err != nil {
+			panic(err)
+		}
+		defer cleanup()
 
-	// start and wait for stop signal
-	if err := app.Run(); err != nil {
-		panic(err)
-	}
+		// start and wait for stop signal
+		if err := app.Run(); err != nil {
+			panic(err)
+		}
+	},
 }

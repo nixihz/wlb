@@ -3,7 +3,7 @@
 
 // The build tag makes sure the stub is not built in the final build.
 
-package main
+package wlb
 
 import (
 	"wlb/internal/biz"
