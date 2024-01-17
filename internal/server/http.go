@@ -1,6 +1,7 @@
 package server
 
 import (
+	`github.com/go-kratos/kratos/v2/middleware/logging`
 	v1 "wlb/api/helloworld/v1"
 	common "wlb/api/network"
 	translate2 "wlb/api/translate"
@@ -19,6 +20,7 @@ func NewHTTPServer(c *conf.Server,
 	logger log.Logger) *http.Server {
 	var opts = []http.ServerOption{
 		http.Middleware(
+			logging.Server(logger),
 			recovery.Recovery(),
 		),
 	}
