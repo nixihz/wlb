@@ -13,3 +13,9 @@ data:
     addr: 127.0.0.1:6379
     read_timeout: 0.2s
     write_timeout: 0.2s
+  lark:
+    feishu_app_name: xxx
+    feishu_app_id: xxx
+    feishu_app_secret: xxx
+    feishu_app_event_encrypt_key: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+    feishu_app_verification_token: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx

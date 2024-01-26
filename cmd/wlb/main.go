@@ -1,15 +1,12 @@
 package wlb
 
 import (
-	"flag"
 	"os"
 
 	"github.com/spf13/cobra"
 	"wlb/internal/conf"
 
 	"github.com/go-kratos/kratos/v2"
-	"github.com/go-kratos/kratos/v2/config"
-	"github.com/go-kratos/kratos/v2/config/file"
 	"github.com/go-kratos/kratos/v2/log"
 	"github.com/go-kratos/kratos/v2/middleware/tracing"
 	"github.com/go-kratos/kratos/v2/transport/grpc"
@@ -24,14 +21,12 @@ var (
 	Name string
 	// Version is the version of the compiled software.
 	Version string
-	// flagconf is the config flag.
-	flagconf string
 
 	id, _ = os.Hostname()
+	Bc    conf.Bootstrap
 )
 
 func init() {
-	flag.StringVar(&flagconf, "conf", "./configs/config.yaml", "config path, eg: -conf config.yaml")
 }
 
 func newApp(logger log.Logger, gs *grpc.Server, hs *http.Server) *kratos.App {
@@ -54,7 +49,6 @@ var HttpCmd = &cobra.Command{
 	Short: "http",
 	Long:  `http接口`,
 	Run: func(cmd *cobra.Command, args []string) {
-		flag.Parse()
 		logger := log.With(log.NewStdLogger(os.Stdout),
 			"ts", log.DefaultTimestamp,
 			"caller", log.DefaultCaller,
@@ -64,23 +58,8 @@ var HttpCmd = &cobra.Command{
 			"trace.id", tracing.TraceID(),
 			"span.id", tracing.SpanID(),
 		)
-		c := config.New(
-			config.WithSource(
-				file.NewSource(flagconf),
-			),
-		)
-		defer c.Close()
 
-		if err := c.Load(); err != nil {
-			panic(err)
-		}
-
-		var bc conf.Bootstrap
-		if err := c.Scan(&bc); err != nil {
-			panic(err)
-		}
-
-		app, cleanup, err := wireApp(bc.Server, bc.Data, logger)
+		app, cleanup, err := wireApp(Bc.Server, Bc.Data, logger)
 		if err != nil {
 			panic(err)
 		}
