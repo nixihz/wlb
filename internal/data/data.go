@@ -7,8 +7,8 @@ import (
 	"github.com/google/wire"
 )
 
-// ProviderSet is data providers.
-var ProviderSet = wire.NewSet(NewData, NewGreeterRepo)
+// DataProviderSet is data providers.
+var DataProviderSet = wire.NewSet(NewData, NewGreeterRepo)
 
 // Data .
 type Data struct {

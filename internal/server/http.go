@@ -1,8 +1,7 @@
 package server
 
 import (
-	`github.com/go-kratos/kratos/v2/middleware/logging`
-	v1 "wlb/api/helloworld/v1"
+	"github.com/go-kratos/kratos/v2/middleware/logging"
 	common "wlb/api/network"
 	translate2 "wlb/api/translate"
 	"wlb/internal/conf"
@@ -15,7 +14,6 @@ import (
 
 // NewHTTPServer new an HTTP server.
 func NewHTTPServer(c *conf.Server,
-	greeter *service.GreeterService,
 	translate *service.TranslateService,
 	logger log.Logger) *http.Server {
 	var opts = []http.ServerOption{
@@ -34,7 +32,6 @@ func NewHTTPServer(c *conf.Server,
 		opts = append(opts, http.Timeout(c.Http.Timeout.AsDuration()))
 	}
 	srv := http.NewServer(opts...)
-	v1.RegisterGreeterHTTPServer(srv, greeter)
 	translate2.RegisterTranslateHTTPServer(srv, translate)
 	common.RegisterUploadHTTPServer(srv)
 	return srv

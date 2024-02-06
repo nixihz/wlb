@@ -6,9 +6,7 @@
 package wlb
 
 import (
-	"wlb/internal/biz"
 	"wlb/internal/conf"
-	"wlb/internal/data"
 	"wlb/internal/server"
 	"wlb/internal/service"
 
@@ -19,5 +17,5 @@ import (
 
 // wireApp init kratos application.
 func wireApp(*conf.Server, *conf.Data, log.Logger) (*kratos.App, func(), error) {
-	panic(wire.Build(server.ProviderSet, data.ProviderSet, biz.ProviderSet, service.ProviderSet, newApp))
+	panic(wire.Build(server.ServerProviderSet, service.ServiceProviderSet, newApp))
 }

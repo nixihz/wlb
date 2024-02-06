@@ -9,9 +9,7 @@ package wlb
 import (
 	"github.com/go-kratos/kratos/v2"
 	"github.com/go-kratos/kratos/v2/log"
-	"wlb/internal/biz"
 	"wlb/internal/conf"
-	"wlb/internal/data"
 	"wlb/internal/server"
 	"wlb/internal/service"
 )
@@ -23,19 +21,11 @@ import (
 // Injectors from wire.go:
 
 // wireApp init kratos application.
-func wireApp(confServer *conf.Server, confData *conf.Data, logger log.Logger) (*kratos.App, func(), error) {
-	dataData, cleanup, err := data.NewData(confData, logger)
-	if err != nil {
-		return nil, nil, err
-	}
-	greeterRepo := data.NewGreeterRepo(dataData, logger)
-	greeterUsecase := biz.NewGreeterUsecase(greeterRepo, logger)
-	greeterService := service.NewGreeterService(greeterUsecase)
-	grpcServer := server.NewGRPCServer(confServer, greeterService, logger)
+func wireApp(confServer *conf.Server, data *conf.Data, logger log.Logger) (*kratos.App, func(), error) {
+	grpcServer := server.NewGRPCServer(confServer, logger)
 	translateService := service.NewTranslateService()
-	httpServer := server.NewHTTPServer(confServer, greeterService, translateService, logger)
+	httpServer := server.NewHTTPServer(confServer, translateService, logger)
 	app := newApp(logger, grpcServer, httpServer)
 	return app, func() {
-		cleanup()
 	}, nil
 }
