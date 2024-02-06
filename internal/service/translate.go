@@ -4,7 +4,9 @@ import (
 	"context"
 	"fmt"
 	"os"
+	"regexp"
 	"strings"
+	"unicode"
 
 	googletrans "cloud.google.com/go/translate"
 	"github.com/go-kratos/kratos/v2/log"
@@ -44,10 +46,7 @@ func (t *TranslateService) Text(ctx context.Context, request *translate.Translat
 }
 
 func (t *TranslateService) trans(ctx context.Context, sourceText string) (string, error) {
-	lang, err := language.Parse("zh-CN")
-	if err != nil {
-		return "", fmt.Errorf("language.Parse: %w", err)
-	}
+	lang := targetLanguageDetect(sourceText)
 
 	client, err := googletrans.NewClient(ctx, option.WithAPIKey(t.APIKey))
 	if err != nil {
@@ -63,4 +62,30 @@ func (t *TranslateService) trans(ctx context.Context, sourceText string) (string
 		return "", fmt.Errorf("Translate returned empty response to text: %s", sourceText)
 	}
 	return resp[0].Text, nil
+}
+
+func targetLanguageDetect(text string) (lang language.Tag) {
+	// 创建一个正则表达式模式，用于匹配中文字符
+	pattern := regexp.MustCompile(`\p{Han}`)
+
+	// 计算文字中的中文字符数量
+	matches := pattern.FindAllString(text, -1)
+	chineseCharCount := len(matches)
+
+	// 计算文字中非中文字符数量
+	nonChineseCharCount := 0
+	for _, char := range text {
+		if !unicode.Is(unicode.Scripts["Han"], char) {
+			nonChineseCharCount++
+		}
+	}
+
+	// 判断大部分是否为中文
+	if chineseCharCount > nonChineseCharCount {
+		lang = language.English
+	} else {
+		lang = language.Chinese
+	}
+
+	return lang
 }
