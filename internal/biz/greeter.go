@@ -10,33 +10,33 @@ var (
 // ErrUserNotFound is user not found.
 )
 
-// Greeter is a Greeter model.
-type Greeter struct {
+// GoVersionis a GoVersionmodel.
+type GoVersion struct {
 	Hello string
 }
 
-// GreeterRepo is a Greater repo.
-type GreeterRepo interface {
-	Save(context.Context, *Greeter) (*Greeter, error)
-	Update(context.Context, *Greeter) (*Greeter, error)
-	FindByID(context.Context, int64) (*Greeter, error)
-	ListByHello(context.Context, string) ([]*Greeter, error)
-	ListAll(context.Context) ([]*Greeter, error)
+// GoVersionRepo is a Greater repo.
+type GoVersionRepo interface {
+	Save(context.Context, *GoVersion) (*GoVersion, error)
+	Update(context.Context, *GoVersion) (*GoVersion, error)
+	FindByID(context.Context, int64) (*GoVersion, error)
+	ListByHello(context.Context, string) ([]*GoVersion, error)
+	ListAll(context.Context) ([]*GoVersion, error)
 }
 
-// GreeterUsecase is a Greeter usecase.
-type GreeterUsecase struct {
-	repo GreeterRepo
+// GoVersionUsecase is a GoVersionusecase.
+type GoVersionUsecase struct {
+	repo GoVersionRepo
 	log  *log.Helper
 }
 
-// NewGreeterUsecase new a Greeter usecase.
-func NewGreeterUsecase(repo GreeterRepo, logger log.Logger) *GreeterUsecase {
-	return &GreeterUsecase{repo: repo, log: log.NewHelper(logger)}
+// NewGoVersionUsecase new a GoVersionusecase.
+func NewGoVersionUsecase(repo GoVersionRepo, logger log.Logger) *GoVersionUsecase {
+	return &GoVersionUsecase{repo: repo, log: log.NewHelper(logger)}
 }
 
-// CreateGreeter creates a Greeter, and returns the new Greeter.
-func (uc *GreeterUsecase) CreateGreeter(ctx context.Context, g *Greeter) (*Greeter, error) {
-	uc.log.WithContext(ctx).Infof("CreateGreeter: %v", g.Hello)
+// CreateGoVersioncreates a GoVersion, and returns the new GoVersion.
+func (uc *GoVersionUsecase) CreateGoVersion(ctx context.Context, g *GoVersion) (*GoVersion, error) {
+	uc.log.WithContext(ctx).Infof("CreateGoVersion: %v", g.Hello)
 	return uc.repo.Save(ctx, g)
 }

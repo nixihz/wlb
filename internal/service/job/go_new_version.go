@@ -12,17 +12,21 @@ import (
 	lark "github.com/larksuite/oapi-sdk-go/v3"
 	larkbitable "github.com/larksuite/oapi-sdk-go/v3/service/bitable/v1"
 	"golang.org/x/net/html"
+	"wlb/internal/biz"
 )
 
-type GoNewVersionJob struct {
-	larkClient *lark.Client
+type GoNewVersion struct {
+	larkClient  *lark.Client
+	goVersionUC *biz.GoVersionUsecase
 }
 
-func NewGoNewVersionJob(
+func NewGoNewVersion(
 	client *lark.Client,
-) *GoNewVersionJob {
-	return &GoNewVersionJob{
-		larkClient: client,
+	goVersionUC *biz.GoVersionUsecase,
+) *GoNewVersion {
+	return &GoNewVersion{
+		larkClient:  client,
+		goVersionUC: goVersionUC,
 	}
 }
 
@@ -37,7 +41,7 @@ type GoVersion struct {
 }
 
 // Run 运行定时任务
-func (job *GoNewVersionJob) Run() {
+func (job *GoNewVersion) Run() {
 	log.Info("run go new version job")
 	ctx := context.Background()
 
@@ -115,7 +119,8 @@ func (job *GoNewVersionJob) Run() {
 	}
 }
 
-func (job *GoNewVersionJob) createRecord(ctx context.Context, version GoVersion) (string, error) {
+func (job *GoNewVersion) createRecord(ctx context.Context, version GoVersion) (string, error) {
+	job.goVersionUC.CreateGoVersion(ctx, &biz.GoVersion{})
 	boolMap := map[bool]string{true: "是", false: "否"}
 	appTableRecord := larkbitable.NewAppTableRecordBuilder().
 		Fields(map[string]interface{}{

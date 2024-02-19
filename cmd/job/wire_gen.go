@@ -7,21 +7,27 @@
 package job
 
 import (
+	"github.com/go-kratos/kratos/v2/log"
 	"github.com/google/wire"
+	"wlb/internal/biz"
 	"wlb/internal/clients"
 	"wlb/internal/conf"
+	"wlb/internal/data"
 	"wlb/internal/service/job"
 )
 
 // Injectors from wire.go:
 
-func NewGoNewVersionJob(data *conf.Data) (*job.GoNewVersionJob, func(), error) {
-	client := clients.NewLarkClient(data)
-	goNewVersionJob := job.NewGoNewVersionJob(client)
-	return goNewVersionJob, func() {
+func NewGoNewVersionJob(data2 *conf.Data, logger log.Logger) (*job.GoNewVersion, func(), error) {
+	client := clients.NewLarkClient(data2)
+	db := clients.NewSqlite3Client(data2)
+	goVersionRepo := data.NewGoVersionRepo(db, logger)
+	goVersionUsecase := biz.NewGoVersionUsecase(goVersionRepo, logger)
+	goNewVersion := job.NewGoNewVersion(client, goVersionUsecase)
+	return goNewVersion, func() {
 	}, nil
 }
 
 // wire.go:
 
-var ProviderSet = wire.NewSet(job.ProviderCronjobSet, clients.ProviderClientsSet)
+var ProviderSet = wire.NewSet(job.ProviderCronjobSet, biz.BizProviderSet, clients.ProviderClientsSet, data.DataProviderSet)

@@ -5,5 +5,5 @@ import (
 )
 
 var ProviderCronjobSet = wire.NewSet(
-	NewGoNewVersionJob,
+	NewGoNewVersion,
 )

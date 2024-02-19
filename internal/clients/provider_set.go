@@ -7,4 +7,5 @@ import (
 // ProviderClientsSet is biz providers.
 var ProviderClientsSet = wire.NewSet(
 	NewLarkClient,
+	NewSqlite3Client,
 )
