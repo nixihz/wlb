@@ -10,7 +10,6 @@ import (
 
 	"github.com/go-kratos/kratos/v2/log"
 	lark "github.com/larksuite/oapi-sdk-go/v3"
-	larkbitable "github.com/larksuite/oapi-sdk-go/v3/service/bitable/v1"
 	"golang.org/x/net/html"
 	"wlb/internal/biz"
 )
@@ -35,7 +34,7 @@ const (
 	GoNewVersion_BITABLE_ID  = "tblfqQ8NLEMlRgGM"
 )
 
-type GoVersion struct {
+type GoVersionData struct {
 	Version string
 	Date    time.Time
 }
@@ -60,8 +59,7 @@ func (job *GoNewVersion) Run() {
 		os.Exit(1)
 	}
 	var traverse func(*html.Node)
-	var versionList []GoVersion
-	now := time.Now()
+	var versionList []GoVersionData
 	// 分析内容，找到 go 版本和发布时间
 	traverse = func(n *html.Node) {
 		if n.Type == html.ElementNode && n.Data == "h2" {
@@ -91,9 +89,8 @@ func (job *GoNewVersion) Run() {
 							fmt.Println("解析时间出错:", err)
 							return
 						}
-						timeGap := now.Add(time.Hour * 24 * -1)
-						if timeGap.Unix() < parsedTime.Unix() {
-							versionList = append(versionList, GoVersion{
+						if len(versionList) < 6 {
+							versionList = append(versionList, GoVersionData{
 								Version: n.FirstChild.FirstChild.Data,
 								Date:    parsedTime,
 							})
@@ -119,26 +116,12 @@ func (job *GoNewVersion) Run() {
 	}
 }
 
-func (job *GoNewVersion) createRecord(ctx context.Context, version GoVersion) (string, error) {
-	job.goVersionUC.CreateGoVersion(ctx, &biz.GoVersion{})
-	boolMap := map[bool]string{true: "是", false: "否"}
-	appTableRecord := larkbitable.NewAppTableRecordBuilder().
-		Fields(map[string]interface{}{
-			"版本号":       version.Version,
-			"是否Major版本": boolMap[isMajorVersion(version.Version)],
-			"发布日期":      version.Date.UnixMilli(),
-		}).Build()
-
-	req := larkbitable.NewCreateAppTableRecordReqBuilder().
-		AppToken(GoNewVersion_BIAPP_TOKEN).TableId(GoNewVersion_BITABLE_ID).
-		AppTableRecord(appTableRecord).
-		Build()
-	resp, err := job.larkClient.Bitable.AppTableRecord.Create(ctx, req)
-	if err != nil || resp.Data == nil {
-		log.Error(err)
-		return "", err
-	}
-	return *resp.Data.Record.RecordId, nil
+func (job *GoNewVersion) createRecord(ctx context.Context, version GoVersionData) (*biz.GoVersion, error) {
+	return job.goVersionUC.CreateGoVersion(ctx, &biz.GoVersion{
+		Version:        version.Version,
+		IsMajorVersion: isMajorVersion(version.Version),
+		VersionDate:    version.Date,
+	})
 }
 
 func isMajorVersion(version string) bool {

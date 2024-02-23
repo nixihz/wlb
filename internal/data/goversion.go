@@ -6,20 +6,26 @@ import (
 	"github.com/go-kratos/kratos/v2/log"
 	"github.com/jinzhu/gorm"
 	"wlb/internal/biz"
+	"wlb/internal/data/factory"
 )
 
 type goVersionRepo struct {
-	log *log.Helper
+	log    *log.Helper
+	client *gorm.DB
 }
 
 // NewGoVersionRepo .
 func NewGoVersionRepo(client *gorm.DB, logger log.Logger) biz.GoVersionRepo {
 	return &goVersionRepo{
-		log: log.NewHelper(logger),
+		log:    log.NewHelper(logger),
+		client: client,
 	}
 }
 
 func (r *goVersionRepo) Save(ctx context.Context, g *biz.GoVersion) (*biz.GoVersion, error) {
+	po := factory.CreateGoVersionPO(*g)
+	r.client.Save(&po)
+
 	return g, nil
 }
 
